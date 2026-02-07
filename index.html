@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Memory Card Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #0f172a, #020617);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+      color: #38bdf8;
+      letter-spacing: 1px;
+    }
+
+    .info {
+      margin-top: 5px;
+      font-size: 18px;
+    }
+
+    .game-board {
+      width: min(90vw, 420px);
+      margin: 25px auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .card {
+      aspect-ratio: 1 / 1;
+      background: #1e293b;
+      border-radius: 14px;
+      cursor: pointer;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.5s;
+    }
+
+    .card.flip {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      font-size: 2.2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      backface-visibility: hidden;
+      border-radius: 14px;
+    }
+
+    .front {
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      transform: rotateY(180deg);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
+    }
+
+    .back {
+      background: #020617;
+      font-size: 1.8rem;
+    }
+
+    /* 📱 Mobile adjustments */
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 24px;
+      }
+
+      .info {
+        font-size: 16px;
+      }
+
+      .card-face {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🧠 Memory Game</h1>
+  <div class="info">Moves: <span id="moves">0</span></div>
+
+  <div class="game-board" id="gameBoard"></div>
+
+  <script>
+    const emojis = [
+      "🔥","🔥","🎮","🎮","😎","😎","🚀","🚀",
+      "⚡","⚡","👑","👑","💎","💎","🎧","🎧"
+    ];
+
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false;
+    let moves = 0;
+
+    const gameBoard = document.getElementById("gameBoard");
+    const movesText = document.getElementById("moves");
+
+    // Shuffle
+    emojis.sort(() => 0.5 - Math.random());
+
+    // Create cards
+    emojis.forEach(emoji => {
+      const card = document.createElement("div");
+      card.classList.add("card");
+
+      card.innerHTML = `
+        <div class="card-face front">${emoji}</div>
+        <div class="card-face back">❓</div>
+      `;
+
+      card.addEventListener("click", () => flipCard(card, emoji));
+      gameBoard.appendChild(card);
+    });
+
+    function flipCard(card, emoji) {
+      if (lockBoard || card === firstCard) return;
+
+      card.classList.add("flip");
+
+      if (!firstCard) {
+        firstCard = card;
+        firstCard.emoji = emoji;
+      } else {
+        secondCard = card;
+        secondCard.emoji = emoji;
+        lockBoard = true;
+        moves++;
+        movesText.textContent = moves;
+        checkMatch();
+      }
+    }
+
+    function checkMatch() {
+      if (firstCard.emoji === secondCard.emoji) {
+        resetTurn();
+      } else {
+        setTimeout(() => {
+          firstCard.classList.remove("flip");
+          secondCard.classList.remove("flip");
+          resetTurn();
+        }, 800);
+      }
+    }
+
+    function resetTurn() {
+      firstCard = null;
+      secondCard = null;
+      lockBoard = false;
+    }
+  </script>
+
+</body>
+</html>
